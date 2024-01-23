@@ -1,91 +1,78 @@
 <script>
   import { onMount } from 'svelte';
-
-  let monthNames = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre','Octubre', 'Noviembre', 'Diciembre'];
+  import { monthNames, daysNames } from '../constants/date'
+  import { getTotalDays, Click } from '../utils/calendar-utilities'
+  
+ 
   let isOpenCalendar = false;
+  let canBackMonth = 0;
   let currentDate = new Date();
-  let currentDay  = currentDate.getDate();
   let monthNumber = currentDate.getMonth();
   let currentYear = currentDate.getFullYear();
-  let dates = [];
+  let leftCalendar = [];
+  let rigthCalendar = [];
 
   function handleFocus( e ) {
-    console.log(e);
     isOpenCalendar = true;
   }
 
-  function create() {
+  function create() {}
 
-  }
-
-  function startDay () {
-    let start = new Date(currentYear, monthNumber, 1);
+  function startDay (month) {
+    let start = new Date(currentYear, month, 1);
     return ((start.getDay()-1) === -1) ? 6 : start.getDay()-1;
   }
 
-  function isLeap () {
-    return ((currentYear % 100 !==0) && (currentYear % 4 === 0) || (currentYear % 400 === 0));
-  }
+  function writeMonth (month) {
+    let dates = [];
 
-  function getTotalDays (month) {
-    if(month === -1) month = 11;
-
-    if (month == 0 || month == 2 || month == 4 || month == 6 || month == 7 || month == 9 || month == 11) {
-        return  31;
-
-    } else if (month == 3 || month == 5 || month == 8 || month == 10) {
-        return 30;
-
-    } else {
-
-        return isLeap() ? 29:28;
-    }
-  } 
-
-  const writeMonth = (month) => {
-    dates = []; // Reset the dates array
-
-    // Add the last days of the previous month
-    for (let i = startDay(); i > 0; i--) {
+    for (let i = startDay(month); i > 0; i--) {
       dates.push({
-        day: getTotalDays(month - 1) - (i - 1),
+        day: getTotalDays(currentYear, month),
         className: 'text-white'
       });
     }
 
-    // Add the days of the current month
-    for (let i = 1; i <= getTotalDays(month); i++) {
+    for (let i = 1; i <= getTotalDays(currentYear, month); i++) {
       dates.push({
         day: i,
         className: 'text-center'
       });
     }
+    return dates;
   }
 
-  const lastMonth = () => {
+  function lastMonth () {
     if(monthNumber !== 0){
         monthNumber--;
     }else{
         monthNumber = 11;
         currentYear--;
     }
+    leftCalendar = writeMonth(monthNumber)
+    rigthCalendar = writeMonth(monthNumber + 1)
 
-    writeMonth(monthNumber)
+    if(canBackMonth > 0){
+      canBackMonth += Click.Back;
+    }
+    
   }
 
-  const nextMonth = () => {
+  function nextMonth () {
     if(monthNumber !== 11){
         monthNumber++;
     }else{
         monthNumber = 0;
         currentYear++;
     }
-
-    writeMonth(monthNumber)
+    leftCalendar = writeMonth(monthNumber);
+    rigthCalendar = writeMonth(monthNumber + 1);
+    canBackMonth += Click.Next;
   }
 
   onMount( () => {
-    writeMonth(monthNumber)
+    leftCalendar = writeMonth(monthNumber)
+    rigthCalendar = writeMonth(monthNumber + 1)
   });
 
 
@@ -118,56 +105,48 @@
 
 </div>
 
-{#if isOpenCalendar}  
-  <div class="flex gap-8">
+{#if true}  
+  <div class="flex gap-8 shadow-gray-300 shadow-xl w-fit p-10 rounded-xl">
     <div class="calendar">
-      <div class="flex items-center justify-center">
-          <button on:click={lastMonth} class="text-left" id="prev-month">&#9664;</button>
-          <div class="text-center" id="month">{monthNames[monthNumber]}</div>
-          <div class="calendar__year" id="year">{currentYear}</div>
+      <div class="flex items-center justify-center gap-1 relative mb-2">
+          {#if canBackMonth !== 0}
+            <button on:click={lastMonth} class="absolute left-0">&#9664;</button>
+          {/if}
+          <div>{monthNames[monthNumber]}</div>
+          <div>{currentYear}</div>
+      </div>
+      <div class="grid gap-2 grid-cols-7">
+          {#each daysNames as day }
+            <div class="text-center">{day}</div>
+          {/each}
       </div>
     
       <div class="grid gap-2 grid-cols-7">
-          <div class="text-center">Lun.</div>
-          <div class="text-center">Mar.</div>
-          <div class="text-center">Mié.</div>
-          <div class="text-center">Jue.</div>
-          <div class="text-center">Vié.</div>
-          <div class="text-center">Sáb.</div>
-          <div class="text-center">Dom.</div>
-      </div>
-    
-      <div class="grid gap-2 grid-cols-7">
-        {#each dates as { day, className }}
-        <div 
-          class={`${className} flex justify-center items-center h-9 w-9 cursor-pointer border border-transparent hover:border-black rounded-full`}
-        >{day}</div>
-      {/each}
+        {#each leftCalendar as { day, className }}
+          <div class={`${className} flex justify-center items-center h-9 w-9 cursor-pointer
+            border-2 border-transparent hover:border-black rounded-full`}>{day}</div>
+        {/each}
       </div>
     </div>
 
     <div class="calendar">
-      <div class="flex items-center justify-center">
-          <div class="calendar__month" id="month">{monthNames[monthNumber + 1]}</div>
-          <div class="calendar__year" id="year">{currentYear}</div>
-          <button on:click={nextMonth} class="calendar__next" id="next-month">&#9654;</button>
+      <div class="flex items-center justify-center gap-1 relative mb-2">
+          <div>{monthNames[monthNumber + 1]}</div>
+          <div>{currentYear}</div>
+          <button on:click={nextMonth} class="absolute right-0">&#9654;</button>
       </div>
     
       <div class="grid gap-2 grid-cols-7">
-          <div class="text-center">Lun.</div>
-          <div class="text-center">Mar.</div>
-          <div class="text-center">Mié.</div>
-          <div class="text-center">Jue.</div>
-          <div class="text-center">Vié.</div>
-          <div class="text-center">Sáb.</div>
-          <div class="text-center">Dom.</div>
+        {#each daysNames as day }
+          <div class="text-center">{day}</div>
+        {/each}
       </div>
     
       <div class="grid gap-2 grid-cols-7" id="dates">
-        {#each dates as { day, className }}
+        {#each rigthCalendar as { day, className }}
           <div 
-            class={`${className} flex justify-center items-center h-9 w-9 cursor-pointer border border-transparent hover:border-black rounded-full`}
-          >{day}</div>
+            class={`${className} flex justify-center items-center h-9 w-9 cursor-pointer 
+              border-2 border-transparent hover:border-black rounded-full`}>{day}</div>
         {/each}
       </div>
     </div>
