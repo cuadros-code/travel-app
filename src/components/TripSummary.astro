@@ -1,0 +1,40 @@
+---
+import TripDetailCard from "./TripDetailCard.astro";
+---
+
+<div class="flex bg-gray-200 p-4 gap-3 rounded-2xl shadow-md shadow-gray-300">
+  <TripDetailCard />
+  <div class="bg-white w-3/6 p-4 rounded-2xl">
+    <p class="font-bold mb-2">Pendientes</p>
+    <div class="flex flex-col gap-2">
+      <div class="flex items-center gap-2 bg-gray-300 w-full p-2 rounded-xl">
+        <input class="check" type="checkbox" id="cbox2" value="second_checkbox" />
+        <label class="text-gray-500 font-bold" for="cbox2">Ir al bar Alquimico</label>
+      </div>
+  
+      <div class="flex items-center gap-2 bg-gray-300 w-full p-2 rounded-xl">
+        <input class="check" type="checkbox" id="cbox2" value="second_checkbox" />
+        <label class="text-gray-500 font-bold" for="cbox2">Donde fidel</label>
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+
+.check {
+    cursor: pointer;
+    background-color: #fff;
+    background-image: url("data:image/svg+xml,%3csvg viewBox='0 0 16 16' fill='white' xmlns='http://www.w3.org/2000/svg'%3e%3cpath d='M12.207 4.793a1 1 0 010 1.414l-5 5a1 1 0 01-1.414 0l-2-2a1 1 0 011.414-1.414L6.5 9.086l4.293-4.293a1 1 0 011.414 0z'/%3e%3c/svg%3e");
+    width: 18px;
+    height: 18px;
+    appearance: none;
+    border: 2px solid #888;
+    border-radius: 100%;
+}
+
+.check:checked {
+  background-color: rgb(72, 75, 236);
+}
+
+</style>
